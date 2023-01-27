@@ -46,10 +46,10 @@ dependencies {
 }
 
 description = "typescript-generator-core"
+//
+//val testsJar by tasks.registering(Jar::class) {
+//    archiveClassifier.set("tests")
+//    from(sourceSets["test"].output)
+//}
 
-val testsJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("tests")
-    from(sourceSets["test"].output)
-}
-
-(publishing.publications["maven"] as MavenPublication).artifact(testsJar)
+//(publishing.publications["maven"] as MavenPublication).artifact(testsJar)

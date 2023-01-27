@@ -10,7 +10,6 @@ plugins {
 }
 
 repositories {
-    mavenLocal()
     maven {
         url = uri("https://repo.maven.apache.org/maven2/")
     }
@@ -30,6 +29,15 @@ java {
 publishing {
     publications.create<MavenPublication>("maven") {
         from(components["java"])
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "localPluginRepository"
+            url = uri("../local-plugin-repository")
+        }
     }
 }
 
