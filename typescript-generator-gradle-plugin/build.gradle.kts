@@ -7,10 +7,11 @@
 plugins {
     id("java-gradle-plugin")
     id("cz.habarta.typescript-generator.java-conventions")
+    id("com.gradle.plugin-publish") version "1.0.0"
 }
 
-
 gradlePlugin {
+    vcsUrl.set("https://github.com/jutoft/typescript-generator.git")
     plugins {
         create("typescriptGeneratorPlugin") {
             id = "org.utoft.typescript-generator"
@@ -20,15 +21,8 @@ gradlePlugin {
 }
 
 dependencies {
-    api("org.codehaus.groovy:groovy-all:2.4.21")
     compileOnly(gradleApi())
     api(project(":typescript-generator-core"))
-//    compileOnly("org.gradle:gradle-core:6.7")
-//    compileOnly("org.gradle:gradle-core-api:6.7")
-//    compileOnly("org.gradle:gradle-model-core:6.7")
-//    compileOnly("org.gradle:gradle-base-services:6.7")
-//    compileOnly("org.gradle:gradle-base-services-groovy:6.7")
-//    compileOnly("org.gradle:gradle-logging:6.7")
 }
 
 description = "typescript-generator-gradle-plugin"
