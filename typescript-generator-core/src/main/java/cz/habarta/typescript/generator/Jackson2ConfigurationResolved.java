@@ -5,13 +5,15 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
+
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 
-public class Jackson2ConfigurationResolved {
+public class Jackson2ConfigurationResolved implements Serializable {
 
     public JsonAutoDetect.Visibility fieldVisibility;
     public JsonAutoDetect.Visibility getterVisibility;
@@ -34,7 +36,6 @@ public class Jackson2ConfigurationResolved {
         resolved.isGetterVisibility = configuration.isGetterVisibility;
         resolved.setterVisibility = configuration.setterVisibility;
         resolved.creatorVisibility = configuration.creatorVisibility;
-        resolved.fieldVisibility = configuration.fieldVisibility;
         resolved.shapeConfigOverrides = resolveClassMappings(
             configuration.shapeConfigOverrides, "shapeConfigOverride", classLoader, Object.class, JsonFormat.Shape::valueOf);
         resolved.enumsUsingToString = configuration.enumsUsingToString;

@@ -33,7 +33,6 @@ import java.util.stream.Stream;
 public abstract class ModelParser {
 
     protected final Settings settings;
-    private final Javadoc javadoc;
     private final DeprecationEnricher deprecationEnricher;
     private final Queue<SourceType<? extends Type>> typeQueue;
     private final TypeProcessor commonTypeProcessor;
@@ -51,7 +50,6 @@ public abstract class ModelParser {
 
     public ModelParser(Settings settings, TypeProcessor commonTypeProcessor, List<RestApplicationParser> restApplicationParsers) {
         this.settings = settings;
-        this.javadoc = new Javadoc(settings);
         this.deprecationEnricher = new DeprecationEnricher();
         this.typeQueue = new LinkedList<>();
         this.restApplicationParsers = restApplicationParsers;
@@ -68,7 +66,6 @@ public abstract class ModelParser {
         if (!settings.ignoreSwaggerAnnotations) {
             model = Swagger.enrichModel(model);
         }
-        model = javadoc.enrichModel(model);
         model = deprecationEnricher.enrichModel(model);
         return model;
     }

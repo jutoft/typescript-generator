@@ -1,43 +1,21 @@
-
 package cz.habarta.typescript.generator.gradle;
 
-import cz.habarta.typescript.generator.ClassMapping;
-import cz.habarta.typescript.generator.DateMapping;
-import cz.habarta.typescript.generator.EnumMapping;
-import cz.habarta.typescript.generator.GsonConfiguration;
-import cz.habarta.typescript.generator.IdentifierCasing;
-import cz.habarta.typescript.generator.Input;
-import cz.habarta.typescript.generator.Jackson2Configuration;
-import cz.habarta.typescript.generator.JsonLibrary;
-import cz.habarta.typescript.generator.JsonbConfiguration;
-import cz.habarta.typescript.generator.Logger;
-import cz.habarta.typescript.generator.MapMapping;
-import cz.habarta.typescript.generator.ModuleDependency;
-import cz.habarta.typescript.generator.NullabilityDefinition;
-import cz.habarta.typescript.generator.OptionalProperties;
-import cz.habarta.typescript.generator.OptionalPropertiesDeclaration;
-import cz.habarta.typescript.generator.Output;
-import cz.habarta.typescript.generator.RestNamespacing;
-import cz.habarta.typescript.generator.Settings;
-import cz.habarta.typescript.generator.StringQuotes;
-import cz.habarta.typescript.generator.TypeScriptFileType;
-import cz.habarta.typescript.generator.TypeScriptGenerator;
-import cz.habarta.typescript.generator.TypeScriptOutputKind;
-import cz.habarta.typescript.generator.util.Utils;
-import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import cz.habarta.typescript.generator.*;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.Task;
+import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.jvm.toolchain.JavaLauncher;
+import org.gradle.workers.WorkQueue;
+import org.gradle.workers.WorkerExecutor;
+
+import javax.inject.Inject;
+import java.io.File;
+import java.util.List;
 
 
-public class GenerateTask extends DefaultTask {
+public abstract class GenerateTask extends DefaultTask {
 
     public String outputFile;
     public TypeScriptFileType outputFileType;
@@ -130,8 +108,12 @@ public class GenerateTask extends DefaultTask {
     public List<String> jackson2Modules;
     public Logger.Level loggingLevel;
 
-    private Settings createSettings(URLClassLoader classLoader) {
-        final Settings settings = new Settings();
+    public GenerateTask() {
+        // add default
+    }
+
+    private InputSettings createSettings() {
+        InputSettings settings = new InputSettings();
         if (outputFileType != null) {
             settings.outputFileType = outputFileType;
         }
@@ -141,9 +123,10 @@ public class GenerateTask extends DefaultTask {
         settings.mapPackagesToNamespaces = mapPackagesToNamespaces;
         settings.umdNamespace = umdNamespace;
         settings.moduleDependencies = moduleDependencies;
-        settings.setExcludeFilter(excludeClasses, excludeClassPatterns);
+        settings.excludeClasses = excludeClasses;
+        settings.excludeClassPatterns = excludeClassPatterns;
         settings.jsonLibrary = jsonLibrary;
-        settings.setJackson2Configuration(classLoader, jackson2Configuration);
+        settings.jackson2Configuration = jackson2Configuration;
         settings.gsonConfiguration = gsonConfiguration;
         settings.jsonbConfiguration = jsonbConfiguration;
         settings.additionalDataLibraries = additionalDataLibraries;
@@ -166,11 +149,11 @@ public class GenerateTask extends DefaultTask {
         settings.mapEnum = mapEnum;
         settings.enumMemberCasing = enumMemberCasing;
         settings.nonConstEnums = nonConstEnums;
-        settings.loadNonConstEnumAnnotations(classLoader, nonConstEnumAnnotations);
+        settings.nonConstEnumAnnotations = nonConstEnumAnnotations;
         settings.mapClasses = mapClasses;
         settings.mapClassesAsClassesPatterns = mapClassesAsClassesPatterns;
         settings.generateConstructors = generateConstructors;
-        settings.loadDisableTaggedUnionAnnotations(classLoader, disableTaggedUnionAnnotations);
+        settings.disableTaggedUnionAnnotations = disableTaggedUnionAnnotations;
         settings.disableTaggedUnions = disableTaggedUnions;
         settings.generateReadonlyAndWriteonlyJSDocTags = generateReadonlyAndWriteonlyJSDocTags;
         settings.ignoreSwaggerAnnotations = ignoreSwaggerAnnotations;
@@ -180,10 +163,10 @@ public class GenerateTask extends DefaultTask {
         settings.generateSpringApplicationClient = generateSpringApplicationClient;
         settings.scanSpringApplication = scanSpringApplication;
         settings.restNamespacing = restNamespacing;
-        settings.setRestNamespacingAnnotation(classLoader, restNamespacingAnnotation);
+        settings.restNamespacingAnnotation = restNamespacingAnnotation;
         settings.restResponseType = restResponseType;
-        settings.setRestOptionsType(restOptionsType);
-        settings.loadCustomTypeProcessor(classLoader, customTypeProcessor);
+        settings.restOptionsType = restOptionsType;
+        settings.customTypeProcessor = customTypeProcessor;
         settings.sortDeclarations = sortDeclarations;
         settings.sortTypeDeclarations = sortTypeDeclarations;
         settings.noFileComment = noFileComment;
@@ -191,32 +174,43 @@ public class GenerateTask extends DefaultTask {
         settings.noEslintDisable = noEslintDisable;
         settings.tsNoCheck = tsNoCheck;
         settings.javadocXmlFiles = javadocXmlFiles;
-        settings.loadExtensions(classLoader, Utils.concat(extensionClasses, extensions), extensionsWithConfiguration);
-        settings.loadIncludePropertyAnnotations(classLoader, includePropertyAnnotations);
-        settings.loadExcludePropertyAnnotations(classLoader, excludePropertyAnnotations);
-        settings.loadOptionalAnnotations(classLoader, optionalAnnotations);
-        settings.loadRequiredAnnotations(classLoader, requiredAnnotations);
-        settings.loadNullableAnnotations(classLoader, nullableAnnotations);
+        settings.extensions = extensions;
+        settings.extensionClasses = extensionClasses;
+        settings.extensionsWithConfiguration = extensionsWithConfiguration;
+        settings.includePropertyAnnotations = includePropertyAnnotations;
+        settings.excludePropertyAnnotations = excludePropertyAnnotations;
+        settings.optionalAnnotations = optionalAnnotations;
+        settings.requiredAnnotations = requiredAnnotations;
+        settings.nullableAnnotations = nullableAnnotations;
         settings.primitivePropertiesRequired = primitivePropertiesRequired;
         settings.generateInfoJson = generateInfoJson;
         settings.generateNpmPackageJson = generateNpmPackageJson;
         settings.npmName = npmName == null && generateNpmPackageJson ? getProject().getName() : npmName;
-        settings.npmVersion = npmVersion == null && generateNpmPackageJson ? settings.getDefaultNpmVersion() : npmVersion;
+        settings.npmVersion = npmVersion == null && generateNpmPackageJson ? "1.0.0" : npmVersion;
         settings.npmTypescriptVersion = npmTypescriptVersion;
         settings.npmBuildScript = npmBuildScript;
         settings.npmPackageDependencies = Settings.convertToMap(npmDependencies, "npmDependencies");
         settings.npmDevDependencies = Settings.convertToMap(npmDevDependencies, "npmDevDependencies");
         settings.npmPeerDependencies = Settings.convertToMap(npmPeerDependencies, "npmPeerDependencies");
-        settings.setStringQuotes(stringQuotes);
-        settings.setIndentString(indentString);
+        settings.stringQuotes = stringQuotes;
+        settings.indentString = indentString;
         settings.jackson2ModuleDiscovery = jackson2ModuleDiscovery;
-        settings.loadJackson2Modules(classLoader, jackson2Modules);
-        settings.classLoader = classLoader;
+        settings.jackson2Modules = jackson2Modules;
+        settings.loggingLevel = loggingLevel;
         return settings;
     }
 
+    @org.gradle.api.tasks.Classpath
+    public abstract ConfigurableFileCollection getClasspath();
+
+    @Inject
+    abstract public WorkerExecutor getWorkerExecutor();
+
+    @Nested
+    public abstract Property<JavaLauncher> getLauncher();
+
     @TaskAction
-    public void generate() throws Exception {
+    public void generate() {
         if (outputKind == null) {
             throw new RuntimeException("Please specify 'outputKind' property.");
         }
@@ -228,53 +222,40 @@ public class GenerateTask extends DefaultTask {
         TypeScriptGenerator.printVersion();
 
         // class loader
-        final Set<URL> urls = new LinkedHashSet<>();
-        for (Task task : getProject().getTasks()) {
-            if (task.getName().startsWith("compile") && !task.getName().startsWith("compileTest")) {
-                for (File file : task.getOutputs().getFiles()) {
-                    urls.add(file.toURI().toURL());
-                }
-            }
-        }
-        urls.addAll(getFilesFromConfiguration("compileClasspath"));
+        WorkQueue workQueue = getWorkerExecutor().processIsolation(processWorkerSpec -> {
+            processWorkerSpec.getClasspath().from(getClasspath());
 
-        try (URLClassLoader classLoader = Settings.createClassLoader(getProject().getName(), urls.toArray(new URL[0]), Thread.currentThread().getContextClassLoader())) {
+            processWorkerSpec.forkOptions(forkOptions -> forkOptions.setExecutable(getLauncher().get().getExecutablePath().getAsFile()));
+        });
 
-            final Settings settings = createSettings(classLoader);
+        final InputSettings settings = createSettings();
 
-            final Input.Parameters parameters = new Input.Parameters();
-            parameters.classNames = classes;
-            parameters.classNamePatterns = classPatterns;
-            parameters.classesWithAnnotations = classesWithAnnotations;
-            parameters.classesImplementingInterfaces = classesImplementingInterfaces;
-            parameters.classesExtendingClasses = classesExtendingClasses;
-            parameters.jaxrsApplicationClassName = classesFromJaxrsApplication;
-            parameters.automaticJaxrsApplication = classesFromAutomaticJaxrsApplication;
-            parameters.isClassNameExcluded = settings.getExcludeFilter();
-            parameters.classLoader = classLoader;
-            parameters.scanningAcceptedPackages = scanningAcceptedPackages;
-            parameters.debug = loggingLevel == Logger.Level.Debug;
+        final Input.Parameters parameters = new Input.Parameters();
+        parameters.classNames = classes;
+        parameters.classNamePatterns = classPatterns;
+        parameters.classesWithAnnotations = classesWithAnnotations;
+        parameters.classesImplementingInterfaces = classesImplementingInterfaces;
+        parameters.classesExtendingClasses = classesExtendingClasses;
+        parameters.jaxrsApplicationClassName = classesFromJaxrsApplication;
+        parameters.automaticJaxrsApplication = classesFromAutomaticJaxrsApplication;
+        parameters.scanningAcceptedPackages = scanningAcceptedPackages;
+        parameters.debug = loggingLevel == Logger.Level.Debug;
 
-            final File output = outputFile != null
-                    ? getProject().file(outputFile)
-                    : new File(new File(getProject().getBuildDir(), "typescript-generator"), getProject().getName() + settings.getExtension());
-            settings.validateFileName(output);
+        final Settings settingsTemp = new Settings();
+        settingsTemp.outputFileType = outputFileType;
 
-            new TypeScriptGenerator(settings).generateTypeScript(Input.from(parameters), Output.to(output));
-        }
+        final File output = outputFile != null
+                ? getProject().file(outputFile)
+                : new File(new File(getProject().getBuildDir(), "typescript-generator"), getProject().getName() + settingsTemp.getExtension());
+        settingsTemp.validateFileName(output);
+
+        workQueue.submit(GenerateTypescriptWorker.class, configs -> {
+            configs.getName().set(getProject().getName());
+            configs.getInputParameters().set(parameters);
+            configs.getOutput().set(output);
+            configs.getSettings().set(settings);
+            configs.getClasspath().from(this.getClasspath());
+        });
+        workQueue.await();
     }
-
-    private List<URL> getFilesFromConfiguration(String configuration) {
-        try {
-            final List<URL> urls = new ArrayList<>();
-            for (File file : getProject().getConfigurations().getAt(configuration).getFiles()) {
-                urls.add(file.toURI().toURL());
-            }
-            return urls;
-        } catch (Exception e) {
-            TypeScriptGenerator.getLogger().warning(String.format("Cannot get file names from configuration '%s': %s", configuration, e.getMessage()));
-            return Collections.emptyList();
-        }
-    }
-
 }

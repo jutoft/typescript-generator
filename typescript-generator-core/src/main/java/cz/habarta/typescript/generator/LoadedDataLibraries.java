@@ -1,6 +1,7 @@
 
 package cz.habarta.typescript.generator;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,7 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
-public class LoadedDataLibraries {
+public class LoadedDataLibraries implements Serializable {
 
     public final List<Class<?>> stringClasses;
     public final List<Class<?>> numberClasses;
