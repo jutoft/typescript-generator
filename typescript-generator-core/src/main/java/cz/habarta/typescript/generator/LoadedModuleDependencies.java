@@ -6,6 +6,7 @@ import cz.habarta.typescript.generator.emitter.InfoJson;
 import cz.habarta.typescript.generator.util.Pair;
 import cz.habarta.typescript.generator.util.Utils;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 
-public class LoadedModuleDependencies {
+public class LoadedModuleDependencies implements Serializable {
 
     private final Map<String/*javaClass*/, Pair<ModuleDependency, String/*namespacedName*/>> classMappings = new LinkedHashMap<>();
 

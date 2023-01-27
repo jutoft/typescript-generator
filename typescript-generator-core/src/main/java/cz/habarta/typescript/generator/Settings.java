@@ -15,6 +15,7 @@ import cz.habarta.typescript.generator.util.Pair;
 import cz.habarta.typescript.generator.util.Utils;
 import java.io.File;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -45,7 +46,7 @@ import java.util.stream.Stream;
  * @see <a href="https://github.com/vojtechhabarta/typescript-generator">README.md</a> on GitHub or in project root directory
  * @see <a href="https://github.com/vojtechhabarta/typescript-generator/wiki">Wiki</a> on GitHub
  */
-public class Settings {
+public class Settings implements Serializable {
     public String newline = String.format("%n");
     public String quotes = "\"";
     public String indentString = "    ";
@@ -144,7 +145,7 @@ public class Settings {
         public Map<String, String> configuration;
     }
 
-    public static class CustomTypeMapping {
+    public static class CustomTypeMapping implements Serializable {
         public final Class<?> rawClass;
         public final boolean matchSubclasses;
         public final GenericName javaType;
@@ -163,7 +164,7 @@ public class Settings {
         }
     }
 
-    public static class CustomTypeAlias {
+    public static class CustomTypeAlias implements Serializable {
         public final GenericName tsType;
         public final String tsDefinition;
 
@@ -173,7 +174,7 @@ public class Settings {
         }
     }
 
-    public static class GenericName {
+    public static class GenericName implements Serializable {
         public final String rawName;
         public final List<String> typeParameters;
 
