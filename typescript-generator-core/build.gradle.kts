@@ -45,6 +45,12 @@ dependencies {
     testImplementation("io.vavr:vavr-jackson:0.10.3")
 }
 
+publishing {
+    publications.create<MavenPublication>("maven") {
+        from(components["java"])
+    }
+}
+
 description = "typescript-generator-core"
 //
 //val testsJar by tasks.registering(Jar::class) {

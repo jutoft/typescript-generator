@@ -5,6 +5,7 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Nested;
+import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.jvm.toolchain.JavaLauncher;
 import org.gradle.workers.WorkQueue;
@@ -38,9 +39,9 @@ public abstract class GenerateTask extends DefaultTask {
     public List<String> includePropertyAnnotations;
     public List<String> excludePropertyAnnotations;
     public JsonLibrary jsonLibrary;
-    public Jackson2Configuration jackson2Configuration;
-    public GsonConfiguration gsonConfiguration;
-    public JsonbConfiguration jsonbConfiguration;
+    public Jackson2Configuration jackson2Configuration = new Jackson2Configuration();
+    public GsonConfiguration gsonConfiguration = new GsonConfiguration();
+    public JsonbConfiguration jsonbConfiguration = new JsonbConfiguration();
     public List<String> additionalDataLibraries;
     public OptionalProperties optionalProperties;
     public OptionalPropertiesDeclaration optionalPropertiesDeclaration;
@@ -207,6 +208,7 @@ public abstract class GenerateTask extends DefaultTask {
     abstract public WorkerExecutor getWorkerExecutor();
 
     @Nested
+    @Optional
     public abstract Property<JavaLauncher> getLauncher();
 
     @TaskAction
@@ -225,7 +227,9 @@ public abstract class GenerateTask extends DefaultTask {
         WorkQueue workQueue = getWorkerExecutor().processIsolation(processWorkerSpec -> {
             processWorkerSpec.getClasspath().from(getClasspath());
 
-            processWorkerSpec.forkOptions(forkOptions -> forkOptions.setExecutable(getLauncher().get().getExecutablePath().getAsFile()));
+            if(getLauncher().isPresent()) {
+                processWorkerSpec.forkOptions(forkOptions -> forkOptions.setExecutable(getLauncher().get().getExecutablePath().getAsFile()));
+            }
         });
 
         final InputSettings settings = createSettings();

@@ -27,16 +27,15 @@ java {
 }
 
 publishing {
-    publications.create<MavenPublication>("maven") {
-        from(components["java"])
-    }
-}
-
-publishing {
     repositories {
         maven {
             name = "localPluginRepository"
             url = uri("../local-plugin-repository")
+        }
+        maven {
+            name = "nexus"
+            url = uri("https://dc1-nexs004.systematicgroup.local/repository/CURA_3RD_PARTY")
+            credentials(PasswordCredentials::class)
         }
     }
 }

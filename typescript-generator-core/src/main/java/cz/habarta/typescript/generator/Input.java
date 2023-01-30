@@ -5,10 +5,11 @@ import cz.habarta.typescript.generator.parser.SourceType;
 import cz.habarta.typescript.generator.util.Utils;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ScanResult;
+
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -39,7 +40,7 @@ public class Input {
         return new Input(sourceTypes);
     }
 
-    public static class Parameters {
+    public static class Parameters implements Serializable {
         public List<String> classNames;
         public List<String> classNamePatterns;
         public List<String> classesWithAnnotations;
@@ -94,7 +95,7 @@ public class Input {
                     ));
                 }
                 if (parameters.jaxrsApplicationClassName != null) {
-                    types.addAll(fromClassNames(Arrays.asList(parameters.jaxrsApplicationClassName)));
+                    types.addAll(fromClassNames(List.of(parameters.jaxrsApplicationClassName)));
                 }
                 if (parameters.automaticJaxrsApplication) {
                     types.addAll(JaxrsApplicationScanner.scanAutomaticJaxrsApplication(classpathScanner.getScanResult(), parameters.isClassNameExcluded));
