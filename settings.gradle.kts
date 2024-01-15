@@ -4,6 +4,11 @@
  * This project uses @Incubating APIs which are subject to change.
  */
 
+buildscript {
+    val cacertsPath = rootProject.projectDir.toPath().toAbsolutePath().resolve("./gradle/cacerts").normalize().toString()
+    System.setProperty("javax.net.ssl.trustStore", cacertsPath)
+}
+
 rootProject.name = "typescript-generator"
 include(":typescript-generator-gradle-plugin")
 include(":typescript-generator-core")
