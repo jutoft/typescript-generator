@@ -578,10 +578,18 @@ public class Settings implements Serializable {
     }
 
     public String getExtension() {
+        return toFileExtension(outputFileType);
+    }
+
+    public static String toFileExtension(TypeScriptFileType outputFileType) {
         return outputFileType == TypeScriptFileType.implementationFile ? ".ts" : ".d.ts";
     }
 
     public void validateFileName(File outputFile) {
+        validateFileName(outputFileType, outputFile);
+    }
+
+    public static void validateFileName(TypeScriptFileType outputFileType, File outputFile) {
         if (outputFileType == TypeScriptFileType.declarationFile && !outputFile.getName().endsWith(".d.ts")) {
             throw new RuntimeException("Declaration file must have 'd.ts' extension: " + outputFile);
         }

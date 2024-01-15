@@ -14,12 +14,14 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
-public class Input {
+public class Input implements Serializable {
+    public Input() {
+        sourceTypes = new ArrayList<>();
+    }
 
     private final List<SourceType<Type>> sourceTypes;
 
@@ -40,21 +42,7 @@ public class Input {
         return new Input(sourceTypes);
     }
 
-    public static class Parameters implements Serializable {
-        public List<String> classNames;
-        public List<String> classNamePatterns;
-        public List<String> classesWithAnnotations;
-        public List<String> classesImplementingInterfaces;
-        public List<String> classesExtendingClasses;
-        public String jaxrsApplicationClassName;
-        public boolean automaticJaxrsApplication;
-        public Predicate<String> isClassNameExcluded;
-        public URLClassLoader classLoader;
-        public List<String> scanningAcceptedPackages;
-        public boolean debug;
-    }
-
-    public static Input from(Parameters parameters) {
+    public static Input from(InputParameters parameters) {
         final ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             if (parameters.classLoader != null) {

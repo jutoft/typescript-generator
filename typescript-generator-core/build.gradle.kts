@@ -24,6 +24,9 @@ dependencies {
     api("javax.json.bind:javax.json.bind-api:1.0")
     api("jakarta.json.bind:jakarta.json.bind-api:3.0.0")
     api("org.graalvm.js:js-scriptengine:22.2.0")
+    api("jakarta.json:jakarta.json-api:2.1.3")
+    api("javax.json:javax.json-api:1.1.4")
+
     runtimeOnly("org.graalvm.js:js:22.2.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
     testImplementation("org.immutables:value:2.9.1")

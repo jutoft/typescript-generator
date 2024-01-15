@@ -3,9 +3,12 @@ package cz.habarta.typescript.generator.gradle;
 import cz.habarta.typescript.generator.*;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.Optional;
+import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.jvm.toolchain.JavaLauncher;
 import org.gradle.workers.WorkQueue;
@@ -18,8 +21,12 @@ import java.util.List;
 
 public abstract class GenerateTask extends DefaultTask {
 
-    public String outputFile;
-    public TypeScriptFileType outputFileType;
+    @OutputFile
+    public abstract RegularFileProperty getOutputFile();
+
+    @Input
+    public abstract Property<TypeScriptFileType> getOutputFileType();
+
     public TypeScriptOutputKind outputKind;
     public String module;
     public String namespace;
@@ -39,9 +46,9 @@ public abstract class GenerateTask extends DefaultTask {
     public List<String> includePropertyAnnotations;
     public List<String> excludePropertyAnnotations;
     public JsonLibrary jsonLibrary;
-    public Jackson2Configuration jackson2Configuration = new Jackson2Configuration();
-    public GsonConfiguration gsonConfiguration = new GsonConfiguration();
-    public JsonbConfiguration jsonbConfiguration = new JsonbConfiguration();
+    public final Jackson2Configuration jackson2Configuration = new Jackson2Configuration();
+    public final GsonConfiguration gsonConfiguration = new GsonConfiguration();
+    public final JsonbConfiguration jsonbConfiguration = new JsonbConfiguration();
     public List<String> additionalDataLibraries;
     public OptionalProperties optionalProperties;
     public OptionalPropertiesDeclaration optionalPropertiesDeclaration;
@@ -111,13 +118,16 @@ public abstract class GenerateTask extends DefaultTask {
 
     public GenerateTask() {
         // add default
+        getOutputFileType().convention(TypeScriptFileType.declarationFile);
+        getOutputFile().convention(getProject().getLayout().getBuildDirectory().zip(getOutputFileType(),
+                (directory, typeScriptFileType) ->
+                        directory.file("typescript-generator/" + getProject().getName()
+                                + Settings.toFileExtension(typeScriptFileType))));
     }
 
     private InputSettings createSettings() {
         InputSettings settings = new InputSettings();
-        if (outputFileType != null) {
-            settings.outputFileType = outputFileType;
-        }
+        settings.outputFileType = getOutputFileType().get();
         settings.outputKind = outputKind;
         settings.module = module;
         settings.namespace = namespace;
@@ -201,8 +211,9 @@ public abstract class GenerateTask extends DefaultTask {
         return settings;
     }
 
-    @org.gradle.api.tasks.Classpath
+    @org.gradle.api.tasks.CompileClasspath
     public abstract ConfigurableFileCollection getClasspath();
+
 
     @Inject
     abstract public WorkerExecutor getWorkerExecutor();
@@ -234,7 +245,7 @@ public abstract class GenerateTask extends DefaultTask {
 
         final InputSettings settings = createSettings();
 
-        final Input.Parameters parameters = new Input.Parameters();
+        final InputParameters parameters = new InputParameters();
         parameters.classNames = classes;
         parameters.classNamePatterns = classPatterns;
         parameters.classesWithAnnotations = classesWithAnnotations;
@@ -245,18 +256,12 @@ public abstract class GenerateTask extends DefaultTask {
         parameters.scanningAcceptedPackages = scanningAcceptedPackages;
         parameters.debug = loggingLevel == Logger.Level.Debug;
 
-        final Settings settingsTemp = new Settings();
-        settingsTemp.outputFileType = outputFileType;
-
-        final File output = outputFile != null
-                ? getProject().file(outputFile)
-                : new File(new File(getProject().getBuildDir(), "typescript-generator"), getProject().getName() + settingsTemp.getExtension());
-        settingsTemp.validateFileName(output);
+        Settings.validateFileName(this.getOutputFileType().get(), this.getOutputFile().getAsFile().get());
 
         workQueue.submit(GenerateTypescriptWorker.class, configs -> {
             configs.getName().set(getProject().getName());
             configs.getInputParameters().set(parameters);
-            configs.getOutput().set(output);
+            configs.getOutput().set(this.getOutputFile());
             configs.getSettings().set(settings);
             configs.getClasspath().from(this.getClasspath());
         });

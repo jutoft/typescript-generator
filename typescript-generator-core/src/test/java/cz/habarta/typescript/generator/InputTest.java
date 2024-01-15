@@ -69,7 +69,7 @@ public class InputTest {
 
     @Test
     public void testClassesWithAnnotations() {
-        final Input.Parameters parameters = new Input.Parameters();
+        final InputParameters parameters = new InputParameters();
         parameters.classesWithAnnotations = Arrays.asList(MyJsonClass.class.getName());
         parameters.scanningAcceptedPackages = Arrays.asList("cz.habarta");
         final String output = new TypeScriptGenerator(TestUtils.settings()).generateTypeScript(Input.from(parameters));
@@ -78,7 +78,7 @@ public class InputTest {
 
     @Test
     public void testClassesImplementingInterfaces() {
-        final Input.Parameters parameters = new Input.Parameters();
+        final InputParameters parameters = new InputParameters();
         parameters.classesImplementingInterfaces = Arrays.asList(MyJsonInterface.class.getName());
         final String output = new TypeScriptGenerator(TestUtils.settings()).generateTypeScript(Input.from(parameters));
         Assertions.assertTrue(output.contains("firstName: string;"));
@@ -87,7 +87,7 @@ public class InputTest {
 
     @Test
     public void testClassesExtendingClasses() {
-        final Input.Parameters parameters = new Input.Parameters();
+        final InputParameters parameters = new InputParameters();
         parameters.classesExtendingClasses = Arrays.asList(MyJsonInterfaceImpl.class.getName());
         final String output = new TypeScriptGenerator(TestUtils.settings()).generateTypeScript(Input.from(parameters));
         Assertions.assertTrue(output.contains("lastName: string;"));

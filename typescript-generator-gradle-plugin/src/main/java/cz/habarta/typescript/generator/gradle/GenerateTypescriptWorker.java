@@ -114,7 +114,7 @@ public abstract class GenerateTypescriptWorker implements WorkAction<TypescriptG
         }
         URLClassLoader classLoader = Settings.createClassLoader(getParameters().getName().get(), urls.toArray(new URL[0]), Thread.currentThread().getContextClassLoader());
         Settings settings = createSettings(classLoader, getParameters().getSettings().get());
-        final Input.Parameters parameters = getParameters().getInputParameters().get();
+        final InputParameters parameters = getParameters().getInputParameters().get();
 
         parameters.isClassNameExcluded = settings.getExcludeFilter();
         parameters.classLoader = classLoader;
