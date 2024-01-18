@@ -377,7 +377,7 @@ public class Settings implements Serializable {
         if (mapClasses == ClassMapping.asClasses && outputFileType != TypeScriptFileType.implementationFile) {
             throw new RuntimeException("'mapClasses' parameter is set to 'asClasses' which generates runtime code but 'outputFileType' parameter is not set to 'implementationFile'.");
         }
-        if (mapClassesAsClassesPatterns != null && mapClasses != ClassMapping.asClasses) {
+        if (mapClassesAsClassesPatterns != null && !mapClassesAsClassesPatterns.isEmpty() && mapClasses != ClassMapping.asClasses) {
             throw new RuntimeException("'mapClassesAsClassesPatterns' parameter can only be used when 'mapClasses' parameter is set to 'asClasses'.");
         }
         if (generateConstructors && mapClasses != ClassMapping.asClasses) {
