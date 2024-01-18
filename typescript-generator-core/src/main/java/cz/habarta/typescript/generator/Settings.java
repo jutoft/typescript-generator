@@ -126,6 +126,8 @@ public class Settings implements Serializable {
     public boolean primitivePropertiesRequired = false;
     public boolean generateInfoJson = false;
     public boolean generateNpmPackageJson = false;
+    public File infoJsonOutput;
+    public File npmPackageOutput;
     public String npmName = null;
     public String npmVersion = null;
     public Map<String, String> npmPackageDependencies = new LinkedHashMap<>();

@@ -80,6 +80,8 @@ public class InputSettings implements Serializable {
     public List<File> javadocXmlFiles = null;
     public boolean primitivePropertiesRequired = false;
     public boolean generateInfoJson = false;
+    public File infoJsonOutput;
+    public File npmPackageOutput;
     public boolean generateNpmPackageJson = false;
     public String npmName = null;
     public String npmVersion = null;

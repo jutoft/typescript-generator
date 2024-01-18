@@ -87,7 +87,10 @@ public class TypeScriptGenerator {
                 throw new RuntimeException("Generating info JSON can only be used when output is specified using file name");
             }
             final File outputFile = new File(output.getName());
-            final Output out = Output.to(new File(outputFile.getParent(), "typescript-generator-info.json"));
+            File npmOutputFile = settings.infoJsonOutput != null ? settings.infoJsonOutput :
+                    new File(outputFile.getParent(), "typescript-generator-info.json");
+
+            final Output out = Output.to(npmOutputFile);
             getInfoJsonEmitter().emit(tsModel, out.getWriter(), out.getName(), out.shouldCloseWriter());
         }
     }
@@ -97,9 +100,14 @@ public class TypeScriptGenerator {
             if (output.getName() == null) {
                 throw new RuntimeException("Generating NPM package.json can only be used when output is specified using file name");
             }
-            final File outputFile = new File(output.getName());
-            final Output npmOutput = Output.to(new File(outputFile.getParent(), "package.json"));
+
+            File outputFile = new File(output.getName());
+            File npmOutputFile = settings.npmPackageOutput != null ? settings.npmPackageOutput :
+                    new File(outputFile.getParent(), "package.json");
+
+            final Output npmOutput = Output.to(npmOutputFile);
             final NpmPackageJson npmPackageJson = new NpmPackageJson();
+
             npmPackageJson.name = settings.npmName;
             npmPackageJson.version = settings.npmVersion;
             npmPackageJson.types = outputFile.getName();

@@ -83,6 +83,8 @@ public abstract class GenerateTypescriptWorker implements WorkAction<TypescriptG
         settings.primitivePropertiesRequired = inputSettings.primitivePropertiesRequired;
         settings.generateInfoJson = inputSettings.generateInfoJson;
         settings.generateNpmPackageJson = inputSettings.generateNpmPackageJson;
+        settings.infoJsonOutput = inputSettings.infoJsonOutput;
+        settings.npmPackageOutput = inputSettings.npmPackageOutput;
         settings.npmName = inputSettings.npmName == null && inputSettings.generateNpmPackageJson ? getParameters().getName().get() : inputSettings.npmName;
         settings.npmVersion = inputSettings.npmVersion == null && inputSettings.generateNpmPackageJson ? settings.getDefaultNpmVersion() : inputSettings.npmVersion;
         settings.npmTypescriptVersion = inputSettings.npmTypescriptVersion;
