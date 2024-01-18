@@ -417,7 +417,7 @@ public final class Utils {
     }
 
     public static List<Pattern> globsToRegexps(List<String> globs) {
-        if (globs == null) {
+        if (globs == null || globs.isEmpty()) {
             return null;
         }
         final List<Pattern> regexps = new ArrayList<>();
