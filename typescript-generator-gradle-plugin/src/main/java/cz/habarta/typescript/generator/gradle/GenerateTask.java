@@ -316,9 +316,10 @@ public abstract class GenerateTask extends DefaultTask {
 
         getJsonInfoOutputFileName().convention("typescript-generator-info.json");
         getJsonInfoOutputFile().fileProvider(getOutputFile().zip(getJsonInfoOutputFileName(), (outFile, fileName) -> outFile.getAsFile().toPath().getParent().resolve(fileName).toFile()));
+        getJsonInfoOutputFile().convention(getOutputDirectory().file(getJsonInfoOutputFileName()));
 
         getNpmPackageJsonOutputFileName().convention("package.json");
-        getNpmPackageJsonOutputFile().fileProvider(getOutputFile().zip(getNpmPackageJsonOutputFileName(), (outFile, fileName) -> outFile.getAsFile().toPath().getParent().resolve(fileName).toFile()));
+        getNpmPackageJsonOutputFile().convention(getOutputDirectory().file(getNpmPackageJsonOutputFileName()));
 
         // faking input property checks that can not easily be done as Properties
         getInputs().property("jackson2Configuration.fieldVisibility", jackson2Configuration.fieldVisibility).optional(true);
