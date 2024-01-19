@@ -365,7 +365,7 @@ public abstract class GenerateTask extends DefaultTask {
         settings.customTypeNamingFunction = getCustomTypeNamingFunction().getOrNull();
         settings.referencedFiles = getReferencedFiles().getOrNull();
         settings.importDeclarations = getImportDeclarations().getOrNull();
-        settings.customTypeMappings = Settings.convertToMap(getCustomTypeNaming().getOrNull(), "customTypeMapping");
+        settings.customTypeMappings = Settings.convertToMap(getCustomTypeMappings().getOrNull(), "customTypeMapping");
         settings.customTypeAliases = Settings.convertToMap(getCustomTypeAliases().getOrNull(), "customTypeAlias");
         settings.mapDate = getMapDate().getOrNull();
         settings.mapMap = getMapMap().getOrNull();
