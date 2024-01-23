@@ -315,7 +315,6 @@ public abstract class GenerateTask extends DefaultTask {
         getOutputFile().convention(getOutputDirectory().file(getOutputFileName()));
 
         getJsonInfoOutputFileName().convention("typescript-generator-info.json");
-        getJsonInfoOutputFile().fileProvider(getOutputFile().zip(getJsonInfoOutputFileName(), (outFile, fileName) -> outFile.getAsFile().toPath().getParent().resolve(fileName).toFile()));
         getJsonInfoOutputFile().convention(getOutputDirectory().file(getJsonInfoOutputFileName()));
 
         getNpmPackageJsonOutputFileName().convention("package.json");
